@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -57,6 +54,14 @@ class DefaultFirebaseOptions {
     appId: '1:112337438259:android:6752f302df853541c10546',
     messagingSenderId: '112337438259',
     projectId: 'velora-febd2',
+    storageBucket: 'velora-febd2.firebasestorage.app',
+  );
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyBcEBrKm7XSZ0lCEUgKaPP3VJMeMSCaNOQ',
+    appId: '1:112337438259:web:a2542d812d1b7f76c10546',
+    messagingSenderId: '112337438259',
+    projectId: 'velora-febd2',
+    authDomain: 'velora-febd2.firebaseapp.com',
     storageBucket: 'velora-febd2.firebasestorage.app',
   );
 }
