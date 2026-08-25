@@ -16,6 +16,7 @@ class ProfileService {
   final FirebaseAuth _auth =
       FirebaseAuth.instance;
 
+  // Create profile
   Future<void> createProfile({
     required String uid,
     required String name,
@@ -33,17 +34,22 @@ class ProfileService {
     });
   }
 
+  // Get profile
   Future<ProfileModel?> getProfile() async {
     final user = _auth.currentUser;
 
-    if (user == null) return null;
+    if (user == null) {
+      return null;
+    }
 
     final snapshot = await _firestore
         .collection('users')
         .doc(user.uid)
         .get();
 
-    if (!snapshot.exists) return null;
+    if (!snapshot.exists) {
+      return null;
+    }
 
     return ProfileModel.fromMap(
       user.uid,
@@ -51,14 +57,17 @@ class ProfileService {
     );
   }
 
-  Future<String> uploadProfileImage(
-    File image,
-  ) async {
+  // Upload profile image
+  Future<String> uploadProfileImage(File image) async {
     final user = _auth.currentUser;
 
     if (user == null) {
       throw Exception('User not logged in');
     }
+
+    print('==============================');
+    print('USER UID: ${user.uid}');
+    print('STARTING IMAGE UPLOAD');
 
     final reference = _storage
         .ref()
@@ -66,11 +75,38 @@ class ProfileService {
         .child(user.uid)
         .child('profile.jpg');
 
-    await reference.putFile(image);
+    print('STORAGE PATH: ${reference.fullPath}');
 
-    return await reference.getDownloadURL();
+    try {
+      final metadata = SettableMetadata(
+        contentType: 'image/jpeg',
+      );
+
+      await reference.putFile(
+        image,
+        metadata,
+      );
+
+      print('UPLOAD SUCCESS');
+
+      final url = await reference.getDownloadURL();
+
+      print('IMAGE URL: $url');
+      print('==============================');
+
+      return url;
+    } on FirebaseException catch (e) {
+      print('FIREBASE STORAGE ERROR');
+      print('CODE: ${e.code}');
+      print('MESSAGE: ${e.message}');
+      rethrow;
+    } catch (e) {
+      print('UPLOAD ERROR: $e');
+      rethrow;
+    }
   }
 
+  // Save profile
   Future<void> saveProfile(
     ProfileModel profile,
   ) async {
