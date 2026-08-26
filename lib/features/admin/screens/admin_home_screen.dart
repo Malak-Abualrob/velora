@@ -1,12 +1,47 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import '../../../models/product_model.dart';
 import '../../../services/product_service.dart';
 import '../../../core/constants/app_colors.dart';
 import 'edit_product_screen.dart';
 
-class AdminHomeScreen extends StatelessWidget {
+class AdminHomeScreen extends StatefulWidget {
   const AdminHomeScreen({super.key});
+
+  @override
+  State<AdminHomeScreen> createState() => _AdminHomeScreenState();
+}
+
+class _AdminHomeScreenState extends State<AdminHomeScreen> {
+  String selectedCategory = 'All';
+  List<String> categories = ['All'];
+
+  final ProductService _productService = ProductService();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('categories')
+          .orderBy('name')
+          .get();
+
+      final cats = snapshot.docs.map((doc) {
+        return doc.data()['name'] as String;
+      }).toList();
+
+      setState(() {
+        categories = ['All', ...cats];
+      });
+    } catch (e) {
+      debugPrint('Error loading categories: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,9 +50,38 @@ class AdminHomeScreen extends StatelessWidget {
         title: const Text('Products'),
         backgroundColor: AppColors.background,
         elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: DropdownButton<String>(
+                isExpanded: true,
+                underline: const SizedBox(),
+                value: selectedCategory,
+                items: categories.map((category) {
+                  return DropdownMenuItem(
+                    value: category,
+                    child: Text(category),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedCategory = value!;
+                  });
+                },
+              ),
+            ),
+          ),
+        ),
       ),
       body: StreamBuilder<List<ProductModel>>(
-        stream: ProductService().getProducts(),
+        stream: _productService.getProducts(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -27,10 +91,17 @@ class AdminHomeScreen extends StatelessWidget {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
 
-          final products = snapshot.data ?? [];
+          var products = snapshot.data ?? [];
+
+          // ✅ فلترة حسب التصنيف المختار
+          if (selectedCategory != 'All') {
+            products = products.where((product) {
+              return product.category == selectedCategory;
+            }).toList();
+          }
 
           if (products.isEmpty) {
-            return const Center(child: Text('No products yet. Add one!'));
+            return const Center(child: Text('No products in this category.'));
           }
 
           return GridView.builder(
@@ -53,6 +124,7 @@ class AdminHomeScreen extends StatelessWidget {
   }
 }
 
+// ✅ ProductCard (نفس الكود)
 class ProductCard extends StatelessWidget {
   final ProductModel product;
 
@@ -125,7 +197,6 @@ class ProductCard extends StatelessWidget {
             ],
           ),
         ),
-        // Edit & Delete buttons
         Positioned(
           top: 8,
           right: 8,
@@ -174,11 +245,19 @@ class ProductCard extends StatelessWidget {
                   );
 
                   if (confirm == true) {
-                    await ProductService().deleteProduct(product.id);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Product deleted')),
-                      );
+                    try {
+                      await ProductService().deleteProduct(product.id);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('✅ Product deleted')),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text('❌ Error: $e')));
+                      }
                     }
                   }
                 },

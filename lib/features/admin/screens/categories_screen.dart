@@ -16,23 +16,52 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
   Future<void> addCategory() async {
     final name = categoryController.text.trim();
-    if (name.isEmpty) return;
 
-    await _firestore.collection('categories').add({
-      'name': name,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a category name')),
+      );
+      return;
+    }
 
-    categoryController.clear();
-    if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Category added!')));
+    try {
+      await _firestore.collection('categories').add({
+        'name': name,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      categoryController.clear();
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('✅ Category "$name" added!')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('❌ Error: $e')));
+      }
     }
   }
 
-  Future<void> deleteCategory(String id) async {
-    await _firestore.collection('categories').doc(id).delete();
+  Future<void> deleteCategory(String id, String name) async {
+    try {
+      await _firestore.collection('categories').doc(id).delete();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('🗑️ Category "$name" deleted!')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('❌ Error: $e')));
+      }
+    }
   }
 
   @override
@@ -45,6 +74,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       ),
       body: Column(
         children: [
+          // حقل إضافة التصنيف
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -59,8 +89,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     child: TextField(
                       controller: categoryController,
                       decoration: const InputDecoration(
-                        hintText: 'New category',
+                        hintText: 'New category name...',
                         border: InputBorder.none,
+                        icon: Icon(Icons.category_outlined),
                       ),
                     ),
                   ),
@@ -70,6 +101,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               ],
             ),
           ),
+
+          // عرض التصنيفات
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: _firestore
@@ -77,20 +110,69 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   .orderBy('createdAt', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
+                // ✅ التحقق من حالة التحميل
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
+                // ✅ التحقق من وجود أخطاء
                 if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 60,
+                          color: Colors.red,
+                        ),
+                        const SizedBox(height: 16),
+                        Text('Error: ${snapshot.error}'),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {});
+                          },
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
                 }
 
                 final docs = snapshot.data?.docs ?? [];
 
+                // ✅ إذا ما في تصنيفات
                 if (docs.isEmpty) {
-                  return const Center(child: Text('No categories yet.'));
+                  return const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.category_outlined,
+                          size: 80,
+                          color: AppColors.grey,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'No categories yet',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.dark,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Add your first category above!',
+                          style: TextStyle(color: AppColors.grey),
+                        ),
+                      ],
+                    ),
+                  );
                 }
 
+                // ✅ عرض التصنيفات
                 return ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: docs.length,
@@ -102,25 +184,38 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 10),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
+                        horizontal: 16,
+                        vertical: 12,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withValues(alpha: 0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            name,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
+                          const Icon(
+                            Icons.category_outlined,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              name,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                           IconButton(
-                            onPressed: () => deleteCategory(doc.id),
+                            onPressed: () => deleteCategory(doc.id, name),
                             icon: const Icon(
                               Icons.delete_outline,
                               color: Colors.red,

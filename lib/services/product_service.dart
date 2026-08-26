@@ -1,19 +1,16 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-
 import '../models/product_model.dart';
 
 class ProductService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
   final FirebaseStorage _storage = FirebaseStorage.instance;
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  //get all products
+  // Get all products
   Stream<List<ProductModel>> getProducts() {
     return _firestore
         .collection('products')
@@ -26,7 +23,7 @@ class ProductService {
         });
   }
 
-  //add product
+  // Add product
   Future<void> addProduct({
     required String name,
     required String price,
@@ -41,7 +38,7 @@ class ProductService {
       throw Exception('Not authenticated');
     }
 
-    //upload image to firebase storage
+    // Upload image to Firebase Storage
     final ref = _storage
         .ref()
         .child('products')
@@ -53,7 +50,7 @@ class ProductService {
 
     final imageUrl = await ref.getDownloadURL();
 
-    //add product to firebase firestore
+    // Add product to Firebase Firestore
     await _firestore.collection('products').add({
       'name': name,
       'price': price,
@@ -66,7 +63,7 @@ class ProductService {
     });
   }
 
-  //update product
+  // Update product
   Future<void> updateProduct({
     required String id,
     required String name,
@@ -100,11 +97,36 @@ class ProductService {
     await _firestore.collection('products').doc(id).update(data);
   }
 
-  //delete product
+  // ✅ Delete product (Fixed)
   Future<void> deleteProduct(String id) async {
-    //delete image from firebase storage
-    final ref = _storage.ref().child('products').child(id);
-    await ref.delete();
-    await _firestore.collection('products').doc(id).delete();
+    try {
+      // 1️⃣ نجيب المنتج عشان نعرف رابط الصورة
+      final doc = await _firestore.collection('products').doc(id).get();
+
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>;
+        final imageUrl = data['imageUrl'] ?? '';
+
+        // 2️⃣ نحذف الصورة من Storage إذا موجودة
+        if (imageUrl.isNotEmpty) {
+          try {
+            // ✅ نستخرج المسار من الـ URL
+            final ref = _storage.refFromURL(imageUrl);
+            await ref.delete();
+            debugPrint('✅ Image deleted from Storage');
+          } catch (e) {
+            debugPrint('⚠️ Error deleting image: $e');
+            // نكمل حتى لو فشل حذف الصورة
+          }
+        }
+      }
+
+      // 3️⃣ نحذف المنتج من Firestore
+      await _firestore.collection('products').doc(id).delete();
+      debugPrint('✅ Product deleted from Firestore');
+    } catch (e) {
+      debugPrint('❌ Error deleting product: $e');
+      rethrow;
+    }
   }
 }
