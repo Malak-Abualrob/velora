@@ -55,10 +55,7 @@ class ProfileController extends ChangeNotifier {
     String imageUrl = profile!.imageUrl;
 
     if (selectedImage != null) {
-      imageUrl =
-          await _service.uploadProfileImage(
-        selectedImage!,
-      );
+      imageUrl = await _service.uploadProfileImage(selectedImage!);
     }
 
     final updatedProfile = ProfileModel(
@@ -68,11 +65,10 @@ class ProfileController extends ChangeNotifier {
       phone: phone,
       bio: bio,
       imageUrl: imageUrl,
+      role: profile!.role,
     );
 
-    await _service.saveProfile(
-      updatedProfile,
-    );
+    await _service.saveProfile(updatedProfile);
 
     profile = updatedProfile;
     selectedImage = null;

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,29 +8,25 @@ import 'package:firebase_storage/firebase_storage.dart';
 import '../models/profile_model.dart';
 
 class ProfileService {
-  final FirebaseFirestore _firestore =
-      FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  final FirebaseStorage _storage =
-      FirebaseStorage.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  final FirebaseAuth _auth =
-      FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // Create profile
   Future<void> createProfile({
     required String uid,
     required String name,
+    String role = 'user', // user or admin
   }) async {
-    await _firestore
-        .collection('users')
-        .doc(uid)
-        .set({
+    await _firestore.collection('users').doc(uid).set({
       'name': name,
       'age': '',
       'phone': '',
       'bio': '',
       'imageUrl': '',
+      'role': role, // user or admin
       'createdAt': FieldValue.serverTimestamp(),
     });
   }
@@ -42,19 +39,13 @@ class ProfileService {
       return null;
     }
 
-    final snapshot = await _firestore
-        .collection('users')
-        .doc(user.uid)
-        .get();
+    final snapshot = await _firestore.collection('users').doc(user.uid).get();
 
     if (!snapshot.exists) {
       return null;
     }
 
-    return ProfileModel.fromMap(
-      user.uid,
-      snapshot.data()!,
-    );
+    return ProfileModel.fromMap(user.uid, snapshot.data()!);
   }
 
   // Upload profile image
@@ -65,57 +56,41 @@ class ProfileService {
       throw Exception('User not logged in');
     }
 
-    print('==============================');
-    print('USER UID: ${user.uid}');
-    print('STARTING IMAGE UPLOAD');
-
     final reference = _storage
         .ref()
         .child('users')
         .child(user.uid)
         .child('profile.jpg');
 
-    print('STORAGE PATH: ${reference.fullPath}');
-
     try {
-      final metadata = SettableMetadata(
-        contentType: 'image/jpeg',
-      );
+      final metadata = SettableMetadata(contentType: 'image/jpeg');
 
-      await reference.putFile(
-        image,
-        metadata,
-      );
+      await reference.putFile(image, metadata);
 
-      print('UPLOAD SUCCESS');
-
-      final url = await reference.getDownloadURL();
-
-      print('IMAGE URL: $url');
-      print('==============================');
-
-      return url;
+      return await reference.getDownloadURL();
     } on FirebaseException catch (e) {
-      print('FIREBASE STORAGE ERROR');
-      print('CODE: ${e.code}');
-      print('MESSAGE: ${e.message}');
-      rethrow;
-    } catch (e) {
-      print('UPLOAD ERROR: $e');
+      debugPrint('Firebase Storage Error: ${e.code}');
+      debugPrint('Message: ${e.message}');
       rethrow;
     }
   }
 
   // Save profile
-  Future<void> saveProfile(
-    ProfileModel profile,
-  ) async {
+  Future<void> saveProfile(ProfileModel profile) async {
     await _firestore
         .collection('users')
         .doc(profile.uid)
-        .set(
-      profile.toMap(),
-      SetOptions(merge: true),
-    );
+        .set(profile.toMap(), SetOptions(merge: true));
+  }
+
+  // Get user role
+  Future<String> getUserRole(String uid) async {
+    final snapshot = await _firestore.collection('users').doc(uid).get();
+
+    if (!snapshot.exists) {
+      return 'user';
+    }
+
+    return snapshot.data()?['role'] ?? 'user';
   }
 }

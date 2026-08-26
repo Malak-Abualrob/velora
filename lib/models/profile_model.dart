@@ -5,6 +5,7 @@ class ProfileModel {
   final String phone;
   final String bio;
   final String imageUrl;
+  final String role; // user or admin
 
   const ProfileModel({
     required this.uid,
@@ -13,12 +14,10 @@ class ProfileModel {
     required this.phone,
     required this.bio,
     required this.imageUrl,
+    required this.role, // user or admin
   });
 
-  factory ProfileModel.fromMap(
-    String uid,
-    Map<String, dynamic> map,
-  ) {
+  factory ProfileModel.fromMap(String uid, Map<String, dynamic> map) {
     return ProfileModel(
       uid: uid,
       name: map['name'] ?? '',
@@ -26,6 +25,7 @@ class ProfileModel {
       phone: map['phone'] ?? '',
       bio: map['bio'] ?? '',
       imageUrl: map['imageUrl'] ?? '',
+      role: map['role'] ?? 'user', // user or admin
     );
   }
 
@@ -36,6 +36,7 @@ class ProfileModel {
       'phone': phone,
       'bio': bio,
       'imageUrl': imageUrl,
+      'role': role, // user or admin
     };
   }
 }

@@ -23,6 +23,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
   final confirmPasswordController = TextEditingController();
 
+  String selectedRole = 'user';
+
   Future<void> signup() async {
     if (nameController.text.trim().isEmpty ||
         emailController.text.trim().isEmpty ||
@@ -56,6 +58,7 @@ class _SignupScreenState extends State<SignupScreen> {
     await ProfileService().createProfile(
       uid: uid,
       name: nameController.text.trim(),
+      role: selectedRole, // save role to firestore
     );
   }
 
@@ -124,6 +127,30 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
 
               const SizedBox(height: 25),
+
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: DropdownButtonFormField<String>(
+                  initialValue: selectedRole,
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    icon: Icon(Icons.admin_panel_settings_outlined),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'user', child: Text('👤 User')),
+                    DropdownMenuItem(value: 'admin', child: Text('🛡️ Admin')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      selectedRole = value!;
+                    });
+                  },
+                ),
+              ),
 
               Consumer<AuthController>(
                 builder: (context, controller, _) {
