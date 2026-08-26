@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -19,11 +20,46 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final descController = TextEditingController();
   final qtyController = TextEditingController();
 
-  String selectedCategory = 'Makeup';
+  String? selectedCategory; // 👈 nullable عشان نعرف إذا اختار ولا لأ
   File? selectedImage;
   bool isLoading = false;
 
-  final categories = ['Makeup', 'Skincare', 'Perfume', 'Hair', 'Nails'];
+  // 👇 قائمة التصنيفات من Firestore
+  List<String> categories = [];
+  bool isLoadingCategories = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('categories')
+          .orderBy('name')
+          .get();
+
+      final cats = snapshot.docs.map((doc) {
+        return doc.data()['name'] as String;
+      }).toList();
+
+      setState(() {
+        categories = cats;
+        isLoadingCategories = false;
+        if (categories.isNotEmpty) {
+          selectedCategory =
+              categories.first; // اختيار أول تصنيف كقيمة افتراضية
+        }
+      });
+    } catch (e) {
+      debugPrint('Error loading categories: $e');
+      setState(() {
+        isLoadingCategories = false;
+      });
+    }
+  }
 
   Future<void> pickImage() async {
     final picker = ImagePicker();
@@ -44,6 +80,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
       return;
     }
 
+    if (selectedCategory == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select a category')));
+      return;
+    }
+
     setState(() => isLoading = true);
 
     try {
@@ -51,16 +94,15 @@ class _AddProductScreenState extends State<AddProductScreen> {
         name: nameController.text.trim(),
         price: priceController.text.trim(),
         description: descController.text.trim(),
-        category: selectedCategory,
+        category: selectedCategory!,
         quantity: int.tryParse(qtyController.text.trim()) ?? 0,
         image: selectedImage!,
       );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Product added successfully!')),
+          const SnackBar(content: Text('✅ Product added successfully!')),
         );
-        // Clear fields
         nameController.clear();
         priceController.clear();
         descController.clear();
@@ -71,7 +113,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ).showSnackBar(SnackBar(content: Text('❌ Error: $e')));
       }
     } finally {
       if (mounted) setState(() => isLoading = false);
@@ -90,6 +132,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+            // ✅ اختيار الصورة
             GestureDetector(
               onTap: pickImage,
               child: Container(
@@ -114,19 +157,26 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     : null,
               ),
             ),
+
             const SizedBox(height: 16),
+
+            // ✅ اسم المنتج
             _buildTextField(
               nameController,
               'Product Name',
               Icons.label_outline,
             ),
             const SizedBox(height: 14),
+
+            // ✅ السعر
             _buildTextField(
               priceController,
               'Price',
               Icons.attach_money_outlined,
             ),
             const SizedBox(height: 14),
+
+            // ✅ الوصف
             _buildTextField(
               descController,
               'Description',
@@ -134,6 +184,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
               maxLines: 3,
             ),
             const SizedBox(height: 14),
+
+            // ✅ الكمية
             _buildTextField(
               qtyController,
               'Quantity',
@@ -141,27 +193,64 @@ class _AddProductScreenState extends State<AddProductScreen> {
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 14),
+
+            // ✅ Dropdown التصنيفات من Firestore
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: DropdownButtonFormField<String>(
-                initialValue: selectedCategory,
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  icon: Icon(Icons.category_outlined),
-                ),
-                items: categories.map((cat) {
-                  return DropdownMenuItem(value: cat, child: Text(cat));
-                }).toList(),
-                onChanged: (value) {
-                  setState(() => selectedCategory = value!);
-                },
-              ),
+              child: isLoadingCategories
+                  ? const Padding(
+                      padding: EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          SizedBox(width: 12),
+                          Text('Loading categories...'),
+                        ],
+                      ),
+                    )
+                  : categories.isEmpty
+                  ? const Padding(
+                      padding: EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.warning_amber_outlined,
+                            color: Colors.orange,
+                          ),
+                          SizedBox(width: 12),
+                          Text(
+                            'No categories. Add one from Categories tab!',
+                            style: TextStyle(color: AppColors.grey),
+                          ),
+                        ],
+                      ),
+                    )
+                  : DropdownButtonFormField<String>(
+                      initialValue: selectedCategory,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        icon: Icon(Icons.category_outlined),
+                      ),
+                      items: categories.map((cat) {
+                        return DropdownMenuItem(value: cat, child: Text(cat));
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() => selectedCategory = value);
+                      },
+                    ),
             ),
+
             const SizedBox(height: 25),
+
+            // ✅ زر الإضافة
             BeautyButton(
               text: 'Add Product',
               loading: isLoading,

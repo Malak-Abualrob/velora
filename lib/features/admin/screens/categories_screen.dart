@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../widgets/beauty_button.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -74,7 +73,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       ),
       body: Column(
         children: [
-          // حقل إضافة التصنيف
+          // ✅ حقل إضافة التصنيف
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -97,12 +96,30 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                BeautyButton(text: 'Add', onPressed: addCategory),
+                // ✅ استخدمنا ElevatedButton بدل BeautyButton
+                ElevatedButton(
+                  onPressed: addCategory,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 14,
+                    ),
+                  ),
+                  child: const Text(
+                    'Add',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
               ],
             ),
           ),
 
-          // عرض التصنيفات
+          // ✅ عرض التصنيفات من Firestore
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: _firestore
@@ -110,12 +127,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   .orderBy('createdAt', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
-                // ✅ التحقق من حالة التحميل
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                // ✅ التحقق من وجود أخطاء
                 if (snapshot.hasError) {
                   return Center(
                     child: Column(
@@ -142,7 +157,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
                 final docs = snapshot.data?.docs ?? [];
 
-                // ✅ إذا ما في تصنيفات
                 if (docs.isEmpty) {
                   return const Center(
                     child: Column(
@@ -172,7 +186,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   );
                 }
 
-                // ✅ عرض التصنيفات
                 return ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: docs.length,
