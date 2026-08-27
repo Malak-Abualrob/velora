@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'features/auth/login_screen.dart';
 import 'features/admin/admin_main_screen.dart';
-import 'user_main_screen.dart';
+import 'features/user/user_main_screen.dart'; // 👈 جديد
 import 'services/profile_service.dart';
 
 class AuthGate extends StatelessWidget {
@@ -24,6 +24,7 @@ class AuthGate extends StatelessWidget {
           return const LoginScreen();
         }
 
+        // ✅ التحقق من الـ Role
         return FutureBuilder<String>(
           future: ProfileService().getUserRole(snapshot.data!.uid),
           builder: (context, roleSnapshot) {
@@ -37,9 +38,9 @@ class AuthGate extends StatelessWidget {
 
             if (role == 'admin') {
               return const AdminMainScreen();
+            } else {
+              return const UserMainScreen(); // 👈 جديد
             }
-
-            return const UserMainScreen();
           },
         );
       },

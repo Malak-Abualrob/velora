@@ -7,7 +7,9 @@ class ProductModel {
   final int quantity;
   final String imageUrl;
 
-  const ProductModel({
+  bool isFavorite; // 👈 للـ UI فقط، مش في Firestore
+
+  ProductModel({
     required this.id,
     required this.name,
     required this.price,
@@ -15,6 +17,7 @@ class ProductModel {
     required this.category,
     required this.quantity,
     required this.imageUrl,
+    this.isFavorite = false,
   });
 
   factory ProductModel.fromMap(String id, Map<String, dynamic> map) {
@@ -26,6 +29,7 @@ class ProductModel {
       category: map['category'] ?? '',
       quantity: map['quantity'] ?? 0,
       imageUrl: map['imageUrl'] ?? '',
+      isFavorite: false, // 👈 دايماً false عند الجلب من Firestore
     );
   }
 
@@ -37,6 +41,20 @@ class ProductModel {
       'category': category,
       'quantity': quantity,
       'imageUrl': imageUrl,
+      // ❌ isFavorite مش موجودة هنا
     };
+  }
+
+  ProductModel copyWith({bool? isFavorite}) {
+    return ProductModel(
+      id: id,
+      name: name,
+      price: price,
+      description: description,
+      category: category,
+      quantity: quantity,
+      imageUrl: imageUrl,
+      isFavorite: isFavorite ?? this.isFavorite,
+    );
   }
 }

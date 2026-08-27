@@ -3,14 +3,14 @@ import '../../../models/order_model.dart';
 import '../../../services/order_service.dart';
 import '../../../core/constants/app_colors.dart';
 
-class OrdersScreen extends StatefulWidget {
-  const OrdersScreen({super.key});
+class UserOrdersScreen extends StatefulWidget {
+  const UserOrdersScreen({super.key});
 
   @override
-  State<OrdersScreen> createState() => _OrdersScreenState();
+  State<UserOrdersScreen> createState() => _UserOrdersScreenState();
 }
 
-class _OrdersScreenState extends State<OrdersScreen> {
+class _UserOrdersScreenState extends State<UserOrdersScreen> {
   final OrderService _orderService = OrderService();
 
   Future<void> _cancelOrder(String orderId) async {
@@ -68,12 +68,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('All Orders'),
+        title: const Text('My Orders'),
         backgroundColor: AppColors.background,
         elevation: 0,
       ),
       body: StreamBuilder<List<OrderModel>>(
-        stream: _orderService.getAllOrders(),
+        stream: _orderService.getUserOrders(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -106,7 +106,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'Orders will appear here when users place them.',
+                    'Start shopping to see your orders here!',
                     style: TextStyle(color: AppColors.grey),
                   ),
                 ],
@@ -138,64 +138,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ✅ معلومات المستخدم
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.person_outline,
-                          size: 20,
-                          color: AppColors.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            order.userName,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.dark,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.phone_outlined,
-                          size: 16,
-                          color: AppColors.grey,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          order.userPhone,
-                          style: const TextStyle(color: AppColors.grey),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.email_outlined,
-                          size: 16,
-                          color: AppColors.grey,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          order.userId, // أو userEmail إذا عندك
-                          style: const TextStyle(
-                            color: AppColors.grey,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 12),
-                    const Divider(),
-
-                    // ✅ معلومات المنتج
+                    // ✅ صورة واسم المنتج
                     Row(
                       children: [
                         ClipRRect(
@@ -203,15 +146,15 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           child: order.productImage.isNotEmpty
                               ? Image.network(
                                   order.productImage,
-                                  width: 50,
-                                  height: 50,
+                                  width: 60,
+                                  height: 60,
                                   fit: BoxFit.cover,
                                   errorBuilder: (_, _, _) =>
-                                      const Icon(Icons.image, size: 30),
+                                      const Icon(Icons.image, size: 40),
                                 )
                               : Container(
-                                  width: 50,
-                                  height: 50,
+                                  width: 60,
+                                  height: 60,
                                   color: AppColors.lightPink,
                                   child: const Icon(
                                     Icons.image,
@@ -238,6 +181,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                   fontSize: 14,
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                'Order #${order.id.substring(0, 6)}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.grey,
                                 ),
                               ),
                             ],
@@ -286,7 +236,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
                     const SizedBox(height: 12),
 
-                    // ✅ زر الإلغاء (للأدمن)
+                    // ✅ زر الإلغاء (للطلبات المعلقة فقط)
                     if (isPending)
                       SizedBox(
                         width: double.infinity,
