@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import 'home/user_home_screen.dart';
 import 'favorites/favorites_screen.dart';
+import 'cart/cart_screen.dart'; // 👈 جديد
 import 'orders/user_orders_screen.dart';
 import '../profile/profile_screen.dart';
 
@@ -18,6 +19,7 @@ class _UserMainScreenState extends State<UserMainScreen> {
   final screens = const [
     UserHomeScreen(),
     FavoritesScreen(),
+    CartScreen(), // 👈 جديد
     UserOrdersScreen(),
     ProfileScreen(),
   ];
@@ -45,6 +47,11 @@ class _UserMainScreenState extends State<UserMainScreen> {
             icon: Icon(Icons.favorite_border),
             selectedIcon: Icon(Icons.favorite, color: AppColors.primary),
             label: 'Favorites',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.shopping_cart_outlined),
+            selectedIcon: Icon(Icons.shopping_cart, color: AppColors.primary),
+            label: 'Cart',
           ),
           NavigationDestination(
             icon: Icon(Icons.shopping_bag_outlined),
