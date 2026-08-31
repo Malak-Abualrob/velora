@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/product_model.dart';
-import '../../../services/order_service.dart';
+import '../../../models/cart_model.dart';
+import '../../../services/cart_service.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../widgets/beauty_button.dart';
 
@@ -14,50 +15,52 @@ class ProductDetailsScreen extends StatefulWidget {
 }
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
-  final OrderService _orderService = OrderService();
+  final CartService _cartService = CartService();
   bool isLoading = false;
+  int _quantity = 1;
 
-  Future<void> _placeOrder() async {
-    if (widget.product.quantity <= 0) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Product is out of stock')));
-      return;
-    }
-
-    // ✅ تأكيد الطلب
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirm Order'),
-        content: Text(
-          'Order "${widget.product.name}" for \$${widget.product.price}?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+  void _incrementQuantity() {
+    setState(() {
+      if (_quantity < widget.product.quantity) {
+        _quantity++;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Only ${widget.product.quantity} available'),
+            backgroundColor: Colors.orange,
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            child: const Text('Order Now'),
-          ),
-        ],
-      ),
-    );
+        );
+      }
+    });
+  }
 
-    if (confirm != true) return;
+  void _decrementQuantity() {
+    setState(() {
+      if (_quantity > 1) {
+        _quantity--;
+      }
+    });
+  }
 
+  Future<void> _addToCart() async {
     setState(() => isLoading = true);
 
     try {
-      await _orderService.createOrder(productId: widget.product.id);
+      final cart = CartModel(
+        productId: widget.product.id,
+        productName: widget.product.name,
+        productImage: widget.product.imageUrl,
+        price: double.tryParse(widget.product.price) ?? 0.0,
+        quantity: _quantity,
+        availableQuantity: widget.product.quantity,
+      );
+
+      await _cartService.addToCart(cart);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Order placed successfully!'),
+          SnackBar(
+            content: Text('✅ Added $_quantity to cart!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -89,7 +92,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ✅ صورة المنتج
             Container(
               height: 300,
               width: double.infinity,
@@ -107,10 +109,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   ? const Icon(Icons.image, size: 80, color: AppColors.grey)
                   : null,
             ),
-
             const SizedBox(height: 20),
-
-            // ✅ اسم المنتج
             Text(
               widget.product.name,
               style: const TextStyle(
@@ -119,10 +118,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 color: AppColors.dark,
               ),
             ),
-
             const SizedBox(height: 8),
-
-            // ✅ التصنيف والسعر
             Row(
               children: [
                 Container(
@@ -153,10 +149,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 ),
               ],
             ),
-
             const SizedBox(height: 12),
-
-            // ✅ الكمية المتوفرة
             Row(
               children: [
                 const Icon(
@@ -171,10 +164,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 ),
               ],
             ),
-
             const SizedBox(height: 12),
-
-            // ✅ حالة التوفر
             if (isOutOfStock)
               Container(
                 padding: const EdgeInsets.all(12),
@@ -197,10 +187,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   ],
                 ),
               ),
-
             const SizedBox(height: 16),
-
-            // ✅ الوصف
             const Text(
               'Description',
               style: TextStyle(
@@ -216,14 +203,60 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   : 'No description available.',
               style: const TextStyle(color: AppColors.grey, height: 1.5),
             ),
-
-            const SizedBox(height: 30),
-
-            // ✅ زر الطلب
+            const SizedBox(height: 24),
+            if (!isOutOfStock) ...[
+              const Text(
+                'Quantity',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.dark,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: _decrementQuantity,
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.lightPink,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.remove, color: AppColors.primary),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    '$_quantity',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.dark,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  GestureDetector(
+                    onTap: _incrementQuantity,
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.add, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
+            const SizedBox(height: 20),
             BeautyButton(
-              text: isOutOfStock ? 'Out of Stock' : 'Order Now',
+              text: isOutOfStock ? 'Out of Stock' : 'Add to Cart 🛒',
               loading: isLoading,
-              onPressed: isOutOfStock ? () {} : _placeOrder,
+              onPressed: isOutOfStock ? () {} : _addToCart,
             ),
           ],
         ),
