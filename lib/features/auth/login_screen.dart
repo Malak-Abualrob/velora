@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:velora/auth_gate.dart';
 
-import 'package:flutter/foundation.dart';
-
 import '../../controllers/auth_controller.dart';
 import '../../core/constants/app_colors.dart';
 import '../../widgets/custom_text_field.dart';

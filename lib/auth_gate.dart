@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 
 import 'features/auth/login_screen.dart';
 import 'features/admin/admin_main_screen.dart';
