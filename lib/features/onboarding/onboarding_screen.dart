@@ -60,11 +60,6 @@ class OnboardingScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                item.image,
-                                style: const TextStyle(fontSize: 80),
-                              ),
-                              const SizedBox(height: 40),
-                              Text(
                                 item.title,
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
@@ -72,6 +67,19 @@ class OnboardingScreen extends StatelessWidget {
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.dark,
                                 ),
+                              ),
+                              const SizedBox(height: 40),
+                              Image.asset(
+                                item.image,
+                                width: 200,
+                                height: 200,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Icon(
+                                    Icons.image_not_supported,
+                                    size: 80,
+                                  );
+                                },
                               ),
                               const SizedBox(height: 16),
                               Text(
