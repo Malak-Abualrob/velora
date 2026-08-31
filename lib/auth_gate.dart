@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import 'features/auth/login_screen.dart';
 import 'features/admin/admin_main_screen.dart';
@@ -20,7 +21,7 @@ class _AuthGateState extends State<AuthGate> {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        print('🟢 StreamBuilder: ${snapshot.connectionState}');
+        debugPrint('🟢 StreamBuilder: ${snapshot.connectionState}');
 
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -30,7 +31,7 @@ class _AuthGateState extends State<AuthGate> {
 
         // ❌ إذا ما في مستخدم
         if (!snapshot.hasData) {
-          print('❌ No user -> Going to Onboarding');
+          debugPrint('❌ No user -> Going to Onboarding');
           // ✅ نستخدم WidgetsBinding عشان نضمن إن الـ Context جاهز
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
@@ -46,12 +47,12 @@ class _AuthGateState extends State<AuthGate> {
         }
 
         // ✅ إذا في مستخدم
-        print('✅ User found: ${snapshot.data!.uid}');
+        debugPrint('✅ User found: ${snapshot.data!.uid}');
 
         // ✅ نستخدم WidgetsBinding عشان نضمن إن الـ Context جاهز
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            _navigateToRoleScreen(context, snapshot.data!.uid);
+            _navigateToRoleScreen(snapshot.data!.uid);
           }
         });
 
@@ -60,10 +61,10 @@ class _AuthGateState extends State<AuthGate> {
     );
   }
 
-  Future<void> _navigateToRoleScreen(BuildContext context, String uid) async {
+  Future<void> _navigateToRoleScreen(String uid) async {
     try {
       final role = await ProfileService().getUserRole(uid);
-      print('✅ Role: $role');
+      debugPrint('✅ Role: $role');
 
       if (!mounted) return;
 
@@ -79,7 +80,7 @@ class _AuthGateState extends State<AuthGate> {
         );
       }
     } catch (e) {
-      print('❌ Error getting role: $e');
+      debugPrint('❌ Error getting role: $e');
       if (mounted) {
         Navigator.pushReplacement(
           context,

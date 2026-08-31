@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:velora/auth_gate.dart';
 
+import 'package:flutter/foundation.dart';
+
 import '../../controllers/auth_controller.dart';
 import '../../core/constants/app_colors.dart';
 import '../../widgets/custom_text_field.dart';
@@ -22,12 +24,12 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    print('🟢 LoginScreen initialized');
+    debugPrint('🟢 LoginScreen initialized');
   }
 
   @override
   Widget build(BuildContext context) {
-    print('🟢 LoginScreen build called');
+    debugPrint('🟢 LoginScreen build called');
 
     return Scaffold(
       body: SafeArea(
@@ -73,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         text: 'Login',
                         loading: controller.isLoading,
                         onPressed: () async {
-                          print('🔵 Login button pressed');
+                          debugPrint('🔵 Login button pressed');
                           final email = emailController.text.trim();
                           final password = passwordController.text.trim();
 
@@ -91,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             password: password,
                           );
 
-                          if (!mounted) return;
+                          if (!context.mounted) return;
 
                           if (!success) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -102,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             );
                           } else {
-                            print('✅ Login successful!');
+                            debugPrint('✅ Login successful!');
                             // ✅ نروح لـ AuthGate مباشرة
                             Navigator.pushReplacement(
                               context,

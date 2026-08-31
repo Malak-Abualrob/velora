@@ -88,7 +88,7 @@ class _AppStartScreenState extends State<AppStartScreen> {
             Image.asset(
               'assets/images/logo.jpg',
               height: 150,
-              errorBuilder: (_, __, ___) => const Text(
+              errorBuilder: (_, _, _) => const Text(
                 '🌸 VELORA',
                 style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
               ),
