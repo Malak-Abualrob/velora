@@ -230,7 +230,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                   width: 50,
                                   height: 50,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) =>
+                                  errorBuilder: (_, _, _) =>
                                       const Icon(Icons.image, size: 30),
                                 )
                               : Container(
