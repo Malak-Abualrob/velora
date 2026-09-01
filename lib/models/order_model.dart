@@ -10,6 +10,7 @@ class OrderModel {
   final String userId;
   final String userName;
   final String userPhone;
+  final String address; // 👈 جديد
 
   final DateTime createdAt;
   final String status;
@@ -23,6 +24,7 @@ class OrderModel {
     required this.userId,
     required this.userName,
     required this.userPhone,
+    required this.address, // 👈 جديد
     required this.createdAt,
     required this.status,
   });
@@ -39,13 +41,15 @@ class OrderModel {
       userId: map['userId'] ?? '',
       userName: map['userName'] ?? '',
       userPhone: map['userPhone'] ?? '',
+      address: map['address'] ?? '', // 👈 جديد
       createdAt: timestamp is Timestamp ? timestamp.toDate() : DateTime.now(),
       status: map['status'] ?? 'pending',
     );
   }
 
   factory OrderModel.fromFirestore(DocumentSnapshot doc) {
-    return OrderModel.fromMap(doc.id, doc.data() as Map<String, dynamic>);
+    final data = doc.data() as Map<String, dynamic>;
+    return OrderModel.fromMap(doc.id, data);
   }
 
   Map<String, dynamic> toMap() {
@@ -57,6 +61,7 @@ class OrderModel {
       'userId': userId,
       'userName': userName,
       'userPhone': userPhone,
+      'address': address, // 👈 جديد
       'createdAt': FieldValue.serverTimestamp(),
       'status': status,
     };
