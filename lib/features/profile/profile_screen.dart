@@ -6,6 +6,7 @@ import '../../controllers/profile_controller.dart';
 import '../../core/constants/app_colors.dart';
 import '../../widgets/beauty_button.dart';
 import '../../widgets/custom_text_field.dart';
+import '../user/address/address_screen.dart'; // 👈 أضيفي هذا الـ import
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -16,11 +17,8 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final nameController = TextEditingController();
-
   final ageController = TextEditingController();
-
   final phoneController = TextEditingController();
-
   final bioController = TextEditingController();
 
   bool initialized = false;
@@ -149,7 +147,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               )
                             : null,
                       ),
-
                       Positioned(
                         right: 0,
                         bottom: 0,
@@ -169,55 +166,70 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 10),
-
                 const Text(
                   'Tap to change photo',
                   style: TextStyle(color: AppColors.grey),
                 ),
-
                 const SizedBox(height: 30),
-
                 CustomTextField(
                   controller: nameController,
                   hint: 'Name',
                   icon: Icons.person_outline,
                 ),
-
                 const SizedBox(height: 15),
-
                 CustomTextField(
                   controller: ageController,
                   hint: 'Age',
                   icon: Icons.cake_outlined,
                   keyboardType: TextInputType.number,
                 ),
-
                 const SizedBox(height: 15),
-
                 CustomTextField(
                   controller: phoneController,
                   hint: 'Phone',
                   icon: Icons.phone_outlined,
                   keyboardType: TextInputType.phone,
                 ),
-
                 const SizedBox(height: 15),
-
                 CustomTextField(
                   controller: bioController,
                   hint: 'Bio',
                   icon: Icons.favorite_outline,
                   maxLines: 4,
                 ),
-
                 const SizedBox(height: 25),
-
                 BeautyButton(
                   text: 'Save Changes',
                   loading: controller.isSaving,
                   onPressed: save,
+                ),
+
+                // ✅ My Address - أضيفي هنا
+                const SizedBox(height: 16),
+
+                ListTile(
+                  leading: const Icon(
+                    Icons.location_on_outlined,
+                    color: AppColors.primary,
+                  ),
+                  title: const Text(
+                    'My Address',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AddressScreen(isCheckout: false),
+                      ),
+                    );
+                  },
+                  tileColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
 
                 const SizedBox(height: 20),
