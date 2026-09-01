@@ -124,15 +124,46 @@ class OrderService {
         });
   }
 
-  // ✅ إلغاء طلب
+  // ✅ إلغاء طلب + إرجاع الكمية للمخزون
   Future<void> cancelOrder(String orderId) async {
     debugPrint('🔄 Cancelling order: $orderId');
     try {
-      await _firestore.collection('orders').doc(orderId).update({
-        'status': 'cancelled',
-        'updatedAt': FieldValue.serverTimestamp(),
+      // ✅ 1️⃣ نجيب الطلب عشان نعرف المنتجات والكميات
+      final orderDoc = await _firestore.collection('orders').doc(orderId).get();
+      if (!orderDoc.exists) throw Exception('Order not found');
+
+      final orderData = orderDoc.data() as Map<String, dynamic>;
+      final items = orderData['items'] as List<dynamic>? ?? [];
+
+      // ✅ 2️⃣ نستخدم Transaction عشان نرجع الكمية
+      await _firestore.runTransaction((transaction) async {
+        // نرجع الكمية لكل منتج
+        for (final item in items) {
+          final itemMap = item as Map<String, dynamic>;
+          final productId = itemMap['productId'] ?? '';
+          final quantity = itemMap['quantity'] ?? 0;
+
+          if (productId.isNotEmpty && quantity > 0) {
+            final productRef = _firestore.collection('products').doc(productId);
+            final productSnapshot = await transaction.get(productRef);
+
+            if (productSnapshot.exists) {
+              final currentQty = productSnapshot.data()?['quantity'] ?? 0;
+              transaction.update(productRef, {
+                'quantity': currentQty + quantity,
+              });
+            }
+          }
+        }
+
+        // ✅ 3️⃣ نغير حالة الطلب
+        transaction.update(_firestore.collection('orders').doc(orderId), {
+          'status': 'cancelled',
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
       });
-      debugPrint('✅ Order cancelled successfully');
+
+      debugPrint('✅ Order cancelled and stock restored');
     } catch (e) {
       debugPrint('❌ Error cancelling order: $e');
       rethrow;
