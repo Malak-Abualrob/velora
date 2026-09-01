@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 class OrderItemModel {
   final String productId;
@@ -126,5 +127,55 @@ class OrderModel {
 
   Map<String, dynamic> toUpdateMap() {
     return {'status': status, 'updatedAt': FieldValue.serverTimestamp()};
+  }
+}
+
+class OrderStatus {
+  static const String pending = 'pending';
+  static const String processing = 'processing';
+  static const String outForDelivery = 'out_for_delivery';
+  static const String delivered = 'delivered';
+  static const String cancelled = 'cancelled';
+
+  static List<String> get all => [
+    pending,
+    processing,
+    outForDelivery,
+    delivered,
+    cancelled,
+  ];
+
+  static String getDisplayName(String status) {
+    switch (status) {
+      case pending:
+        return 'Pending';
+      case processing:
+        return 'Processing';
+      case outForDelivery:
+        return 'Out for Delivery';
+      case delivered:
+        return 'Delivered';
+      case cancelled:
+        return 'Cancelled';
+      default:
+        return status;
+    }
+  }
+
+  static Color getColor(String status) {
+    switch (status) {
+      case pending:
+        return Colors.orange;
+      case processing:
+        return Colors.blue;
+      case outForDelivery:
+        return Colors.purple;
+      case delivered:
+        return Colors.green;
+      case cancelled:
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 }
