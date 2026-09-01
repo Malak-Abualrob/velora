@@ -3,6 +3,7 @@ import '../../../models/cart_model.dart';
 import '../../../services/cart_service.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../widgets/beauty_button.dart';
+import '../checkout/checkout_screen.dart'; // 👈 أضيفي هذا
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -307,13 +308,15 @@ class CartScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 12),
+                    // ✅ زر Checkout المعدل
                     BeautyButton(
                       text: 'Proceed to Checkout',
                       onPressed: () {
                         if (subtotal > 0) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Checkout coming soon! 🛍️'),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const CheckoutScreen(),
                             ),
                           );
                         } else {
