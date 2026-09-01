@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
+import 'screens/dashboard_screen.dart'; // 👈 جديد
 import 'screens/admin_home_screen.dart';
 import 'screens/add_product_screen.dart';
 import 'screens/categories_screen.dart';
@@ -18,6 +19,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
   int currentIndex = 0;
 
   final screens = [
+    const DashboardScreen(),
     const AdminHomeScreen(),
     const AddProductScreen(),
     const CategoriesScreen(),
@@ -39,6 +41,11 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
         backgroundColor: Colors.white,
         indicatorColor: AppColors.lightPink,
         destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.dashboard_outlined), // 👈 Dashboard
+            selectedIcon: Icon(Icons.dashboard, color: AppColors.primary),
+            label: 'Dashboard',
+          ),
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home, color: AppColors.primary),
