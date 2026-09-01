@@ -120,6 +120,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
             itemBuilder: (context, index) {
               final order = orders[index];
               final isPending = order.status == 'pending';
+              final firstItem = order.items.isNotEmpty
+                  ? order.items.first
+                  : null;
 
               return Container(
                 margin: const EdgeInsets.only(bottom: 16),
@@ -183,10 +186,31 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          order.userId, // أو userEmail إذا عندك
+                          order.userEmail,
                           style: const TextStyle(
                             color: AppColors.grey,
                             fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 16,
+                          color: AppColors.grey,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            order.address,
+                            style: const TextStyle(
+                              color: AppColors.grey,
+                              fontSize: 12,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -200,13 +224,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
-                          child: order.productImage.isNotEmpty
+                          child: firstItem?.productImage.isNotEmpty == true
                               ? Image.network(
-                                  order.productImage,
+                                  firstItem!.productImage,
                                   width: 50,
                                   height: 50,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, _, _) =>
+                                  errorBuilder: (_, __, ___) =>
                                       const Icon(Icons.image, size: 30),
                                 )
                               : Container(
@@ -225,7 +249,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                order.productName,
+                                firstItem?.productName ?? 'Unknown Product',
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -233,13 +257,23 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                 ),
                               ),
                               Text(
-                                '\$${order.price.toStringAsFixed(2)}',
+                                firstItem != null
+                                    ? '\$${double.tryParse(firstItem.productPrice)?.toStringAsFixed(2) ?? firstItem.productPrice}'
+                                    : '\$0.00',
                                 style: const TextStyle(
                                   fontSize: 14,
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
+                              if (order.items.length > 1)
+                                Text(
+                                  'Qty: ${firstItem?.quantity ?? 0}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.grey,
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -248,6 +282,31 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
                     const SizedBox(height: 12),
                     const Divider(),
+
+                    // ✅ المجموع الكلي
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Total',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.dark,
+                          ),
+                        ),
+                        Text(
+                          '\$${double.tryParse(order.total)?.toStringAsFixed(2) ?? order.total}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 8),
 
                     // ✅ حالة الطلب
                     Row(

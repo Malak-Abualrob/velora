@@ -152,4 +152,71 @@ class OrderService {
       rethrow;
     }
   }
+
+  // ✅ إنشاء طلب من السلة (3 خطوات)
+  Future<void> createOrderFromCart({
+    required String userId,
+    required String userEmail,
+    required String userName,
+    required String userPhone,
+    required String address,
+    required List<OrderItemModel> items,
+    required String total,
+    required List<CartModel> cartItems,
+  }) async {
+    await _firestore.runTransaction((transaction) async {
+      // ✅ 1️⃣ تحديث المخزون (إنقاص الكمية لكل منتج)
+      for (final item in cartItems) {
+        final productRef = _firestore
+            .collection('products')
+            .doc(item.productId);
+        final productSnapshot = await transaction.get(productRef);
+
+        if (!productSnapshot.exists) {
+          throw Exception('Product not found: ${item.productName}');
+        }
+
+        final currentQty = productSnapshot.data()?['quantity'] ?? 0;
+
+        if (currentQty < item.quantity) {
+          throw Exception('Not enough stock for: ${item.productName}');
+        }
+
+        transaction.update(productRef, {
+          'quantity': currentQty - item.quantity,
+        });
+      }
+
+      // ✅ 2️⃣ إنشاء الطلب
+      final orderRef = _firestore.collection('orders').doc();
+
+      final order = OrderModel(
+        id: orderRef.id,
+        userId: userId,
+        userEmail: userEmail,
+        userName: userName,
+        userPhone: userPhone,
+        address: address,
+        items: items,
+        total: total,
+        status: 'pending',
+        createdAt: DateTime.now(),
+      );
+
+      transaction.set(orderRef, order.toMap());
+
+      // ✅ 3️⃣ تفريغ السلة
+      final user = _auth.currentUser;
+      if (user == null) throw Exception('Not authenticated');
+
+      final cartRef = _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('cart');
+
+      for (final item in cartItems) {
+        transaction.delete(cartRef.doc(item.productId));
+      }
+    });
+  }
 }

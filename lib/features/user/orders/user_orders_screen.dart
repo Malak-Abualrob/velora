@@ -121,6 +121,11 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
               final order = orders[index];
               final isPending = order.status == 'pending';
 
+              // ✅ جلب أول منتج في الطلب
+              final firstItem = order.items.isNotEmpty
+                  ? order.items.first
+                  : null;
+
               return Container(
                 margin: const EdgeInsets.only(bottom: 16),
                 padding: const EdgeInsets.all(16),
@@ -143,13 +148,13 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
-                          child: order.productImage.isNotEmpty
+                          child: firstItem?.productImage.isNotEmpty == true
                               ? Image.network(
-                                  order.productImage,
+                                  firstItem!.productImage,
                                   width: 60,
                                   height: 60,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, _, _) =>
+                                  errorBuilder: (_, __, ___) =>
                                       const Icon(Icons.image, size: 40),
                                 )
                               : Container(
@@ -168,7 +173,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                order.productName,
+                                firstItem?.productName ?? 'Unknown Product',
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -176,7 +181,9 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                 ),
                               ),
                               Text(
-                                '\$${order.price.toStringAsFixed(2)}',
+                                firstItem != null
+                                    ? '\$${double.tryParse(firstItem.productPrice)?.toStringAsFixed(2) ?? firstItem.productPrice}'
+                                    : '\$0.00',
                                 style: const TextStyle(
                                   fontSize: 14,
                                   color: AppColors.primary,
@@ -190,6 +197,15 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                   color: AppColors.grey,
                                 ),
                               ),
+                              // ✅ عرض عدد المنتجات
+                              if (order.items.length > 1)
+                                Text(
+                                  '+${order.items.length - 1} more items',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.grey,
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -198,6 +214,31 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
 
                     const SizedBox(height: 12),
                     const Divider(),
+
+                    // ✅ المجموع الكلي
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Total',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.dark,
+                          ),
+                        ),
+                        Text(
+                          '\$${double.tryParse(order.total)?.toStringAsFixed(2) ?? order.total}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 8),
 
                     // ✅ حالة الطلب
                     Row(
