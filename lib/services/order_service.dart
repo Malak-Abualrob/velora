@@ -185,7 +185,7 @@ class OrderService {
     }
   }
 
-  // ✅ إنشاء طلب من السلة (3 خطوات)
+  // ✅ إنشاء طلب من السلة (نسخة مبسطة للاختبار)
   Future<void> createOrderFromCart({
     required String userId,
     required String userEmail,
@@ -196,13 +196,54 @@ class OrderService {
     required String total,
     required List<CartModel> cartItems,
   }) async {
-    await _firestore.runTransaction((transaction) async {
-      // ✅ 1️⃣ تحديث المخزون (إنقاص الكمية لكل منتج)
+    try {
+      debugPrint('🔥 Starting createOrderFromCart');
+      debugPrint('📦 Items count: ${items.length}');
+      debugPrint('💰 Total: $total');
+      debugPrint('👤 User: $userName');
+
+      // ✅ 1️⃣ إنشاء الطلب أولاً (بدون Transaction)
+      final orderRef = _firestore.collection('orders').doc();
+
+      // ✅ تحويل items إلى List<Map>
+      final itemsMap = items
+          .map(
+            (item) => {
+              'productId': item.productId,
+              'productName': item.productName,
+              'productPrice': item.productPrice,
+              'productImage': item.productImage,
+              'quantity': item.quantity,
+            },
+          )
+          .toList();
+
+      debugPrint('📦 Items Map: $itemsMap');
+
+      final orderData = {
+        'userId': userId,
+        'userEmail': userEmail,
+        'userName': userName,
+        'userPhone': userPhone,
+        'address': address,
+        'items': itemsMap,
+        'total': total,
+        'status': 'pending',
+        'createdAt': FieldValue.serverTimestamp(),
+      };
+
+      debugPrint('📦 Order Data: $orderData');
+
+      await orderRef.set(orderData);
+      debugPrint('✅ Order created: ${orderRef.id}');
+
+      // ✅ 2️⃣ تحديث المخزون (إنقاص الكمية لكل منتج)
       for (final item in cartItems) {
+        debugPrint('📦 Processing: ${item.productName} x ${item.quantity}');
         final productRef = _firestore
             .collection('products')
             .doc(item.productId);
-        final productSnapshot = await transaction.get(productRef);
+        final productSnapshot = await productRef.get();
 
         if (!productSnapshot.exists) {
           throw Exception('Product not found: ${item.productName}');
@@ -214,28 +255,9 @@ class OrderService {
           throw Exception('Not enough stock for: ${item.productName}');
         }
 
-        transaction.update(productRef, {
-          'quantity': currentQty - item.quantity,
-        });
+        await productRef.update({'quantity': currentQty - item.quantity});
+        debugPrint('✅ Stock updated for: ${item.productName}');
       }
-
-      // ✅ 2️⃣ إنشاء الطلب
-      final orderRef = _firestore.collection('orders').doc();
-
-      final order = OrderModel(
-        id: orderRef.id,
-        userId: userId,
-        userEmail: userEmail,
-        userName: userName,
-        userPhone: userPhone,
-        address: address,
-        items: items,
-        total: total,
-        status: 'pending',
-        createdAt: DateTime.now(),
-      );
-
-      transaction.set(orderRef, order.toMap());
 
       // ✅ 3️⃣ تفريغ السلة
       final user = _auth.currentUser;
@@ -247,8 +269,15 @@ class OrderService {
           .collection('cart');
 
       for (final item in cartItems) {
-        transaction.delete(cartRef.doc(item.productId));
+        await cartRef.doc(item.productId).delete();
+        debugPrint('🗑️ Deleted from cart: ${item.productName}');
       }
-    });
+
+      debugPrint('✅ Order placed successfully!');
+    } catch (e) {
+      debugPrint('❌ ERROR: $e');
+      debugPrint('❌ Stack trace: ${StackTrace.current}');
+      rethrow;
+    }
   }
 }
