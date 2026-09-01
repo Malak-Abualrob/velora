@@ -59,7 +59,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   Future<void> _placeOrder() async {
     if (_address == null) {
-      final result = await Navigator.push(
+      await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => AddressScreen(
@@ -267,7 +267,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                       width: 50,
                                       height: 50,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) =>
+                                      errorBuilder: (_, _, _) =>
                                           const Icon(Icons.image, size: 30),
                                     )
                                   : Container(

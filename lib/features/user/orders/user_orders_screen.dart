@@ -154,7 +154,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                   width: 60,
                                   height: 60,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) =>
+                                  errorBuilder: (_, _, _) =>
                                       const Icon(Icons.image, size: 40),
                                 )
                               : Container(
