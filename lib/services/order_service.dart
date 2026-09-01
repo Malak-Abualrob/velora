@@ -185,6 +185,24 @@ class OrderService {
     }
   }
 
+  // ✅ تحديث حالة الطلب (للأدمن)
+  Future<void> updateOrderStatus({
+    required String orderId,
+    required String newStatus,
+  }) async {
+    debugPrint('🔄 Updating order status: $orderId -> $newStatus');
+    try {
+      await _firestore.collection('orders').doc(orderId).update({
+        'status': newStatus,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      debugPrint('✅ Order status updated successfully');
+    } catch (e) {
+      debugPrint('❌ Error updating order status: $e');
+      rethrow;
+    }
+  }
+
   // ✅ إنشاء طلب من السلة (نسخة مبسطة للاختبار)
   Future<void> createOrderFromCart({
     required String userId,
