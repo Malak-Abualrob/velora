@@ -198,12 +198,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   icon: Icons.favorite_outline,
                   maxLines: 4,
                 ),
-                const SizedBox(height: 25),
-                BeautyButton(
-                  text: 'Save Changes',
-                  loading: controller.isSaving,
-                  onPressed: save,
-                ),
 
                 // ✅ My Address - أضيفي هنا
                 const SizedBox(height: 16),
@@ -230,6 +224,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
+                ),
+
+                const SizedBox(height: 25),
+                BeautyButton(
+                  text: 'Save Changes',
+                  loading: controller.isSaving,
+                  onPressed: save,
                 ),
 
                 const SizedBox(height: 20),
