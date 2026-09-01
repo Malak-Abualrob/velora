@@ -13,6 +13,31 @@ class OrdersScreen extends StatefulWidget {
 class _OrdersScreenState extends State<OrdersScreen> {
   final OrderService _orderService = OrderService();
 
+  Future<void> _updateStatus(String orderId, String newStatus) async {
+    try {
+      await _orderService.updateOrderStatus(
+        orderId: orderId,
+        newStatus: newStatus,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '✅ Order status updated to ${OrderStatus.getDisplayName(newStatus)}',
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('❌ Error: $e')));
+      }
+    }
+  }
+
   Future<void> _cancelOrder(String orderId) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -34,34 +59,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
     );
 
     if (confirm == true) {
-      try {
-        await _orderService.cancelOrder(orderId);
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('✅ Order cancelled')));
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('❌ Error: $e')));
-        }
-      }
+      await _updateStatus(orderId, OrderStatus.cancelled);
     }
   }
 
   Color _getStatusColor(String status) {
-    switch (status) {
-      case 'pending':
-        return Colors.orange;
-      case 'completed':
-        return Colors.green;
-      case 'cancelled':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
+    return OrderStatus.getColor(status);
   }
 
   @override
@@ -119,7 +122,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
             itemCount: orders.length,
             itemBuilder: (context, index) {
               final order = orders[index];
-              final isPending = order.status == 'pending';
               final firstItem = order.items.isNotEmpty
                   ? order.items.first
                   : null;
@@ -215,7 +217,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 12),
                     const Divider(),
 
@@ -268,7 +269,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                               ),
                               if (order.items.length > 1)
                                 Text(
-                                  'Qty: ${firstItem?.quantity ?? 0}',
+                                  '+${order.items.length - 1} more items',
                                   style: const TextStyle(
                                     fontSize: 12,
                                     color: AppColors.grey,
@@ -279,7 +280,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 12),
                     const Divider(),
 
@@ -305,10 +305,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 8),
 
-                    // ✅ حالة الطلب
+                    // ✅ حالة الطلب (مع Dropdown)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -323,13 +322,28 @@ class _OrdersScreenState extends State<OrdersScreen> {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Text(
-                              order.status.toUpperCase(),
-                              style: TextStyle(
-                                color: _getStatusColor(order.status),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
+                            // 👇 Dropdown لتغيير الحالة
+                            DropdownButton<String>(
+                              value: order.status,
+                              underline: const SizedBox(),
+                              items: OrderStatus.all.map((status) {
+                                return DropdownMenuItem(
+                                  value: status,
+                                  child: Text(
+                                    OrderStatus.getDisplayName(status),
+                                    style: TextStyle(
+                                      color: OrderStatus.getColor(status),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (newStatus) {
+                                if (newStatus != null &&
+                                    newStatus != order.status) {
+                                  _updateStatus(order.id, newStatus);
+                                }
+                              },
                             ),
                           ],
                         ),
@@ -342,11 +356,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 12),
 
-                    // ✅ زر الإلغاء (للأدمن)
-                    if (isPending)
+                    // ✅ زر الإلغاء (للطلبات المعلقة فقط)
+                    if (order.status == OrderStatus.pending)
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(

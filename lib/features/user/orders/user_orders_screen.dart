@@ -52,16 +52,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
   }
 
   Color _getStatusColor(String status) {
-    switch (status) {
-      case 'pending':
-        return Colors.orange;
-      case 'completed':
-        return Colors.green;
-      case 'cancelled':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
+    return OrderStatus.getColor(status); // ✅ تستخدم OrderStatus
   }
 
   @override
@@ -256,7 +247,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              order.status.toUpperCase(),
+                              OrderStatus.getDisplayName(order.status),
                               style: TextStyle(
                                 color: _getStatusColor(order.status),
                                 fontWeight: FontWeight.bold,
