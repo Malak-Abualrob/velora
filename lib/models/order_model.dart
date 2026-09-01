@@ -87,6 +87,29 @@ class OrderModel {
     );
   }
 
+  // ✅ أضيفي هذه الدالة
+  factory OrderModel.fromMap(String id, Map<String, dynamic> map) {
+    final itemsList = (map['items'] as List<dynamic>? ?? [])
+        .map((item) => OrderItemModel.fromMap(item as Map<String, dynamic>))
+        .toList();
+
+    return OrderModel(
+      id: id,
+      userId: map['userId'] ?? '',
+      userEmail: map['userEmail'] ?? '',
+      userName: map['userName'] ?? '',
+      userPhone: map['userPhone'] ?? '',
+      address: map['address'] ?? '',
+      items: itemsList,
+      total: map['total'] ?? '0',
+      status: map['status'] ?? 'pending',
+      createdAt: (map['createdAt'] as Timestamp).toDate(),
+      updatedAt: map['updatedAt'] != null
+          ? (map['updatedAt'] as Timestamp).toDate()
+          : null,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'userId': userId,
