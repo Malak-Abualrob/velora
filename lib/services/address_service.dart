@@ -6,6 +6,7 @@ class AddressService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  // 👇 حفظ عنوان المستخدم
   Future<void> saveAddress(AddressModel address) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
@@ -18,6 +19,7 @@ class AddressService {
         .set(address.toMap());
   }
 
+  // 👇 جلب عنوان المستخدم
   Future<AddressModel?> getAddress() async {
     final user = _auth.currentUser;
     if (user == null) return null;
@@ -34,5 +36,23 @@ class AddressService {
 
     final doc = snapshot.docs.first;
     return AddressModel.fromMap(doc.id, doc.data());
+  }
+
+  // 👇 جلب كل العناوين
+  Stream<List<AddressModel>> getAddresses() {
+    final user = _auth.currentUser;
+    if (user == null) return Stream.value([]);
+
+    return _firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('addresses')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map((doc) {
+            return AddressModel.fromMap(doc.id, doc.data());
+          }).toList();
+        });
   }
 }
