@@ -37,20 +37,56 @@ class _LoginScreenState extends State<LoginScreen> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  const Text('🌸', style: TextStyle(fontSize: 60)),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'Welcome to VELORA',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.dark,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Your beauty space is waiting for you 💕',
-                    style: TextStyle(color: AppColors.grey),
+                  Column(
+                    children: [
+                      const SizedBox(height: 10),
+
+                      // Velora Logo
+                      Text(
+                        'VELORA',
+                        style: TextStyle(
+                          fontSize: 34,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 7,
+                          color: AppColors.dark,
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      // Small elegant line
+                      Container(
+                        width: 42,
+                        height: 1,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.55),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      const Text(
+                        'Welcome to VELORA',
+                        style: TextStyle(
+                          fontSize: 25,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.dark,
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      const Text(
+                        'Your beauty space is waiting for you',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontStyle: FontStyle.italic,
+                          color: AppColors.grey,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 35),
                   CustomTextField(
