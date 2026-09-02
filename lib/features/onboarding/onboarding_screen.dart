@@ -29,25 +29,45 @@ class OnboardingScreen extends StatelessWidget {
       child: Consumer<OnboardingController>(
         builder: (context, controller, child) {
           return Scaffold(
-            backgroundColor: AppColors.background,
+            backgroundColor: const Color(0xFFFAF7F8),
             body: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 child: Column(
                   children: [
-                    // Skip button
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: TextButton(
-                        onPressed: () => finish(context),
-                        child: const Text(
-                          'Skip',
-                          style: TextStyle(color: AppColors.grey, fontSize: 16),
+                    // =========================
+                    // TOP BAR
+                    // =========================
+                    SizedBox(
+                      height: 45,
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () => finish(context),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                          ),
+                          child: const Text(
+                            'Skip',
+                            style: TextStyle(
+                              color: AppColors.grey,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ),
                       ),
                     ),
 
-                    // Pages
+                    // =========================
+                    // PAGES
+                    // =========================
                     Expanded(
                       child: PageView.builder(
                         controller: controller.pageController,
@@ -56,69 +76,103 @@ class OnboardingScreen extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final item = OnboardingModel.onboardingList[index];
 
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                item.title,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.dark,
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // Image Container
+                                Container(
+                                  width: double.infinity,
+                                  height: 300,
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF5EEF0),
+                                    borderRadius: BorderRadius.circular(32),
+                                  ),
+                                  child: Image.asset(
+                                    item.image,
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return const Icon(
+                                        Icons.image_not_supported_outlined,
+                                        size: 60,
+                                        color: AppColors.grey,
+                                      );
+                                    },
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 40),
-                              Image.asset(
-                                item.image,
-                                width: 200,
-                                height: 200,
-                                fit: BoxFit.contain,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return const Icon(
-                                    Icons.image_not_supported,
-                                    size: 80,
-                                  );
-                                },
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                item.description,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: AppColors.grey,
+
+                                const SizedBox(height: 42),
+
+                                // Title
+                                Text(
+                                  item.title,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 28,
+                                    height: 1.2,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.dark,
+                                    letterSpacing: -0.3,
+                                  ),
                                 ),
-                              ),
-                            ],
+
+                                const SizedBox(height: 16),
+
+                                // Description
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                  ),
+                                  child: Text(
+                                    item.description,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      height: 1.6,
+                                      color: AppColors.grey,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           );
                         },
                       ),
                     ),
 
-                    // Indicators
+                    // =========================
+                    // PAGE INDICATORS
+                    // =========================
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(3, (index) {
-                        return Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 6),
-                          width: controller.currentIndex == index ? 24 : 8,
-                          height: 8,
+                        final isActive = controller.currentIndex == index;
+
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOut,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: isActive ? 28 : 7,
+                          height: 7,
                           decoration: BoxDecoration(
-                            color: controller.currentIndex == index
+                            color: isActive
                                 ? AppColors.primary
-                                : AppColors.lightPink,
-                            borderRadius: BorderRadius.circular(4),
+                                : const Color(0xFFE5D9DD),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         );
                       }),
                     ),
 
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 28),
 
-                    // Next / Get Started
+                    // =========================
+                    // NEXT / GET STARTED
+                    // =========================
                     BeautyButton(
-                      text: controller.isLastPage ? 'Get Started 🌸' : 'Next',
+                      text: controller.isLastPage ? 'Get Started' : 'Next',
                       onPressed: () async {
                         if (controller.isLastPage) {
                           await finish(context);
@@ -127,6 +181,8 @@ class OnboardingScreen extends StatelessWidget {
                         }
                       },
                     ),
+
+                    const SizedBox(height: 10),
                   ],
                 ),
               ),
