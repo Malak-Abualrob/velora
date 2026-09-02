@@ -58,7 +58,7 @@ class _SignupScreenState extends State<SignupScreen> {
     await ProfileService().createProfile(
       uid: uid,
       name: nameController.text.trim(),
-      role: selectedRole, // save role to firestore
+      role: selectedRole,
     );
   }
 
@@ -71,28 +71,70 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFFAF7F8),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
-              const SizedBox(height: 30),
+              const SizedBox(height: 25),
 
-              Image.asset('assets/images/logo.jpg', height: 100),
+              // =========================
+              // VELORA BRANDING
+              // =========================
+              Column(
+                children: [
+                  Text(
+                    'VELORA',
+                    style: TextStyle(
+                      fontSize: 34,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 7,
+                      color: AppColors.dark,
+                    ),
+                  ),
 
-              const SizedBox(height: 20),
+                  const SizedBox(height: 8),
 
-              const Text(
-                'Create your account',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.dark,
-                ),
+                  Container(
+                    width: 42,
+                    height: 1,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.55),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  const Text(
+                    'Create your account',
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.dark,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  const Text(
+                    'Where elegance meets beauty.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontStyle: FontStyle.italic,
+                      color: AppColors.grey,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ],
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 38),
 
+              // =========================
+              // NAME
+              // =========================
               CustomTextField(
                 controller: nameController,
                 hint: 'Name',
@@ -101,6 +143,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 15),
 
+              // =========================
+              // EMAIL
+              // =========================
               CustomTextField(
                 controller: emailController,
                 hint: 'Email',
@@ -110,6 +155,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 15),
 
+              // =========================
+              // PASSWORD
+              // =========================
               CustomTextField(
                 controller: passwordController,
                 hint: 'Password',
@@ -119,6 +167,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 15),
 
+              // =========================
+              // CONFIRM PASSWORD
+              // =========================
               CustomTextField(
                 controller: confirmPasswordController,
                 hint: 'Confirm Password',
@@ -128,21 +179,25 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 25),
 
+              // =========================
+              // ROLE
+              // =========================
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: const Color(0xFFE8DEE2)),
                 ),
                 child: DropdownButtonFormField<String>(
                   initialValue: selectedRole,
                   decoration: const InputDecoration(
                     border: InputBorder.none,
-                    icon: Icon(Icons.admin_panel_settings_outlined),
+                    icon: Icon(Icons.person_outline, color: AppColors.primary),
                   ),
                   items: const [
-                    DropdownMenuItem(value: 'user', child: Text('👤 User')),
-                    DropdownMenuItem(value: 'admin', child: Text('🛡️ Admin')),
+                    DropdownMenuItem(value: 'user', child: Text('User')),
+                    DropdownMenuItem(value: 'admin', child: Text('Admin')),
                   ],
                   onChanged: (value) {
                     setState(() {
@@ -152,6 +207,11 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ),
 
+              const SizedBox(height: 25),
+
+              // =========================
+              // CREATE ACCOUNT
+              // =========================
               Consumer<AuthController>(
                 builder: (context, controller, _) {
                   return BeautyButton(
@@ -164,12 +224,23 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 15),
 
+              // =========================
+              // LOGIN
+              // =========================
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: const Text('Already have an account? Login'),
+                child: const Text(
+                  'Already have an account? Login',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
+
+              const SizedBox(height: 15),
             ],
           ),
         ),
