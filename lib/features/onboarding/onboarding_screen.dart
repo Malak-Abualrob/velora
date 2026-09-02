@@ -18,7 +18,9 @@ class OnboardingScreen extends StatelessWidget {
 
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      MaterialPageRoute(
+        builder: (_) => const LoginScreen(),
+      ),
     );
   }
 
@@ -66,104 +68,117 @@ class OnboardingScreen extends StatelessWidget {
                     ),
 
                     // =========================
-                    // PAGES
+                    // ONBOARDING PAGES
                     // =========================
                     Expanded(
                       child: PageView.builder(
                         controller: controller.pageController,
-                        itemCount: OnboardingModel.onboardingList.length,
+                        itemCount:
+                            OnboardingModel.onboardingList.length,
                         onPageChanged: controller.onPageChanged,
                         itemBuilder: (context, index) {
-                          final item = OnboardingModel.onboardingList[index];
+                          final item =
+                              OnboardingModel.onboardingList[index];
 
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                // Image Container
-                                Container(
-                                  width: double.infinity,
-                                  height: 300,
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF5EEF0),
-                                    borderRadius: BorderRadius.circular(32),
-                                  ),
-                                  child: Image.asset(
-                                    item.image,
-                                    fit: BoxFit.contain,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return const Icon(
-                                        Icons.image_not_supported_outlined,
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // =========================
+                              // IMAGE
+                              // =========================
+                              Image.asset(
+                                item.image,
+                                width: double.infinity,
+                                height: 330,
+                                fit: BoxFit.contain,
+                                errorBuilder:
+                                    (context, error, stackTrace) {
+                                  return const SizedBox(
+                                    height: 330,
+                                    child: Center(
+                                      child: Icon(
+                                        Icons
+                                            .image_not_supported_outlined,
                                         size: 60,
                                         color: AppColors.grey,
-                                      );
-                                    },
-                                  ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+
+                              const SizedBox(height: 30),
+
+                              // =========================
+                              // TITLE
+                              // =========================
+                              Text(
+                                item.title,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 28,
+                                  height: 1.2,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.dark,
+                                  letterSpacing: -0.3,
                                 ),
+                              ),
 
-                                const SizedBox(height: 42),
+                              const SizedBox(height: 15),
 
-                                // Title
-                                Text(
-                                  item.title,
+                              // =========================
+                              // DESCRIPTION
+                              // =========================
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                child: Text(
+                                  item.description,
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
-                                    fontSize: 28,
-                                    height: 1.2,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.dark,
-                                    letterSpacing: -0.3,
+                                    fontSize: 15,
+                                    height: 1.6,
+                                    color: AppColors.grey,
                                   ),
                                 ),
-
-                                const SizedBox(height: 16),
-
-                                // Description
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                  ),
-                                  child: Text(
-                                    item.description,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      height: 1.6,
-                                      color: AppColors.grey,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           );
                         },
                       ),
                     ),
 
                     // =========================
-                    // PAGE INDICATORS
+                    // INDICATORS
                     // =========================
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(3, (index) {
-                        final isActive = controller.currentIndex == index;
+                      children: List.generate(
+                        3,
+                        (index) {
+                          final isActive =
+                              controller.currentIndex == index;
 
-                        return AnimatedContainer(
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeInOut,
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          width: isActive ? 28 : 7,
-                          height: 7,
-                          decoration: BoxDecoration(
-                            color: isActive
-                                ? AppColors.primary
-                                : const Color(0xFFE5D9DD),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        );
-                      }),
+                          return AnimatedContainer(
+                            duration:
+                                const Duration(milliseconds: 250),
+                            curve: Curves.easeInOut,
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                            ),
+                            width: isActive ? 28 : 7,
+                            height: 7,
+                            decoration: BoxDecoration(
+                              color: isActive
+                                  ? AppColors.primary
+                                  : const Color(0xFFE5D9DD),
+                              borderRadius:
+                                  BorderRadius.circular(10),
+                            ),
+                          );
+                        },
+                      ),
                     ),
 
                     const SizedBox(height: 28),
@@ -172,7 +187,9 @@ class OnboardingScreen extends StatelessWidget {
                     // NEXT / GET STARTED
                     // =========================
                     BeautyButton(
-                      text: controller.isLastPage ? 'Get Started' : 'Next',
+                      text: controller.isLastPage
+                          ? 'Get Started'
+                          : 'Next',
                       onPressed: () async {
                         if (controller.isLastPage) {
                           await finish(context);
