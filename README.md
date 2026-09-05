@@ -53,16 +53,17 @@ The project was developed with a focus on **clean UI, organized architecture, Fi
 ### Onboarding & Authentication
 
 <p align="center">
-  <img src="screenshots/onboarding.png" width="250"/>
+  <img src="screenshots/onboarding1.png" width="250"/>
+  <img src="screenshots/onboarding2.png" width="250"/>
+  <img src="screenshots/onboarding3.png" width="250"/>
   <img src="screenshots/login.png" width="250"/>
   <img src="screenshots/signup.png" width="250"/>
 </p>
 
-### Home & Products
+### Home 
 
 <p align="center">
   <img src="screenshots/home.png" width="250"/>
-  <img src="screenshots/product_details.png" width="250"/>
 </p>
 
 ### Favorites & Cart
@@ -72,11 +73,10 @@ The project was developed with a focus on **clean UI, organized architecture, Fi
   <img src="screenshots/cart.png" width="250"/>
 </p>
 
-### Checkout & Orders
+### Address & Orders
 
 <p align="center">
   <img src="screenshots/address.png" width="250"/>
-  <img src="screenshots/checkout.png" width="250"/>
   <img src="screenshots/orders.png" width="250"/>
 </p>
 
