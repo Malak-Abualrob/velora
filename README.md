@@ -53,37 +53,37 @@ The project was developed with a focus on **clean UI, organized architecture, Fi
 ### Onboarding & Authentication
 
 <p align="center">
-  <img src="screenshots/onboarding1.png" width="250"/>
-  <img src="screenshots/onboarding2.png" width="250"/>
-  <img src="screenshots/onboarding3.png" width="250"/>
-  <img src="screenshots/login.png" width="250"/>
-  <img src="screenshots/signup.png" width="250"/>
+  <img src="screenshots/onboarding1.jpeg" width="250"/>
+  <img src="screenshots/onboarding2.jpeg" width="250"/>
+  <img src="screenshots/onboarding3.jpeg" width="250"/>
+  <img src="screenshots/login.jpeg" width="250"/>
+  <img src="screenshots/signup.jpeg" width="250"/>
 </p>
 
 ### Home 
 
 <p align="center">
-  <img src="screenshots/home.png" width="250"/>
+  <img src="screenshots/home.jpeg" width="250"/>
 </p>
 
 ### Favorites & Cart
 
 <p align="center">
-  <img src="screenshots/favorites.png" width="250"/>
-  <img src="screenshots/cart.png" width="250"/>
+  <img src="screenshots/favorites.jpeg" width="250"/>
+  <img src="screenshots/cart.jpeg" width="250"/>
 </p>
 
 ### Address & Orders
 
 <p align="center">
-  <img src="screenshots/address.png" width="250"/>
-  <img src="screenshots/orders.png" width="250"/>
+  <img src="screenshots/address.jpeg" width="250"/>
+  <img src="screenshots/orders.jpeg" width="250"/>
 </p>
 
 ### Profile
 
 <p align="center">
-  <img src="screenshots/profile.png" width="250"/>
+  <img src="screenshots/profile.jpeg" width="250"/>
 </p>
 
 ---
@@ -93,22 +93,22 @@ The project was developed with a focus on **clean UI, organized architecture, Fi
 ### Dashboard & Products
 
 <p align="center">
-  <img src="screenshots/admin_dashboard.png" width="250"/>
-  <img src="screenshots/admin_products.png" width="250"/>
+  <img src="screenshots/admin_dashboard.jpeg" width="250"/>
+  <img src="screenshots/admin_products.jpeg" width="250"/>
 </p>
 
 ### Categories & Orders
 
 <p align="center">
-  <img src="screenshots/categories.png" width="250"/>
-  <img src="screenshots/admin_orders.png" width="250"/>
+  <img src="screenshots/categories.jpeg" width="250"/>
+  <img src="screenshots/admin_orders.jpeg" width="250"/>
 </p>
 
 ### Product Management
 
 <p align="center">
-  <img src="screenshots/add_product.png" width="250"/>
-  <img src="screenshots/edit_product.png" width="250"/>
+  <img src="screenshots/add_product.jpeg" width="250"/>
+  <img src="screenshots/edit_product.jpeg" width="250"/>
 </p>
 
 ---
